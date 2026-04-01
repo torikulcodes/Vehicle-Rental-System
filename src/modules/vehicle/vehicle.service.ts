@@ -22,8 +22,8 @@ const getAllVehicles = async () => await pool.query(`SELECT * FROM vehicles`);
 const getVehicleById = async (id: number) =>
   await pool.query(`SELECT * FROM vehicles WHERE id = $1`, [id]);
 
-const updateVehicle = async (id: number, payload: ICreateVehicle) => {
-  const { vehicle_name, type, registration_number, daily_rent_price } = payload;
+const updateVehicle = async (id: number, payload: ICreateVehicle & { availability_status?: string }) => {
+  const { vehicle_name, type, registration_number, daily_rent_price, availability_status } = payload;
 
   const isExistVehicle = await pool.query(
     `SELECT * FROM vehicles WHERE id = $1`,
@@ -32,9 +32,38 @@ const updateVehicle = async (id: number, payload: ICreateVehicle) => {
 
   if (isExistVehicle.rows.length === 0) throw new Error("Vehicle not found");
 
+  const updateFields: string[] = [];
+  const updateValues: any[] = [];
+  let paramIndex = 1;
+
+  if (vehicle_name) {
+    updateFields.push(`vehicle_name = $${paramIndex++}`);
+    updateValues.push(vehicle_name);
+  }
+  if (type) {
+    updateFields.push(`type = $${paramIndex++}`);
+    updateValues.push(type);
+  }
+  if (registration_number) {
+    updateFields.push(`registration_number = $${paramIndex++}`);
+    updateValues.push(registration_number);
+  }
+  if (daily_rent_price) {
+    updateFields.push(`daily_rent_price = $${paramIndex++}`);
+    updateValues.push(daily_rent_price);
+  }
+  if (availability_status) {
+    updateFields.push(`availability_status = $${paramIndex++}`);
+    updateValues.push(availability_status);
+  }
+
+  if (updateFields.length === 0) throw new Error("No fields provided to update");
+
+  updateValues.push(id);
+
   return await pool.query(
-    `UPDATE vehicles SET vehicle_name = $1, type = $2, registration_number = $3, daily_rent_price = $4 WHERE id = $5 RETURNING *`,
-    [vehicle_name, type, registration_number, daily_rent_price, id],
+    `UPDATE vehicles SET ${updateFields.join(", ")} WHERE id = $${paramIndex} RETURNING *`,
+    updateValues,
   );
 };
 

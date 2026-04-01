@@ -33,7 +33,7 @@ const updateUser = async (
 
 const deleteUser = async (id: number, user: IRequestUser) => {
   const existBooking = await pool.query(
-    `SELECT * FROM bookings WHERE user_id = $1 AND status = 'active'`,
+    `SELECT * FROM bookings WHERE customer_id = $1 AND status = 'active'`,
     [id],
   );
 

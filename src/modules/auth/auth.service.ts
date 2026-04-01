@@ -12,6 +12,10 @@ const createUsers = async (
   role: string,
 ) => {
   // Validation (throw error)
+  if (!email || typeof email !== "string" || !email.includes("@")) {
+    throw new Error("Valid email is required");
+  }
+
   if (!password || password.length < 6) {
     throw new Error("Password must be at least 6 characters");
   }
@@ -21,12 +25,13 @@ const createUsers = async (
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
+  const lowerCaseEmail = email.toLowerCase();
 
   const result = await pool.query(
     `INSERT INTO users(name, email, password, phone, role)
      VALUES($1, $2, $3, $4, $5)
      RETURNING *`,
-    [name, email, hashedPassword, phone, role || "customer"],
+    [name, lowerCaseEmail, hashedPassword, phone, role || "customer"],
   );
 
   // MUST return result
@@ -34,8 +39,9 @@ const createUsers = async (
 };
 
 const loginUser = async (email: string, password: string) => {
+  const lowerCaseEmail = email.toLowerCase();
   const user = await pool.query(`SELECT * FROM users WHERE email = $1`, [
-    email,
+    lowerCaseEmail,
   ]);
 
   if (user.rows.length === 0) {

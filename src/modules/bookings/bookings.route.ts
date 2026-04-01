@@ -12,6 +12,6 @@ router.post(
 
 router.get("/", checkAuth(Role.ADMIN, Role.CUSTOMER), bookingController.getAllBookings);
 
-router.put("/:bookingId", checkAuth(Role.ADMIN), bookingController.updateBooking);
+router.put("/:bookingId", checkAuth(Role.ADMIN, Role.CUSTOMER), bookingController.updateBooking);
 
 export const bookingRoute = router;
