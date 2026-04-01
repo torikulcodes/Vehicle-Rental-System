@@ -1,32 +1,18 @@
 import { Request, Response } from "express";
-import { pool } from "../../config/database";
-import bcrypt from "bcryptjs";
+import { userService } from "./auth.service";
 
-export const register = async (req: Request, res: Response) => {
+const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone, role } = req.body;
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 6 characters",
-      });
-    }
+    console.log(req.body);
 
-    if (role !== "admin" && role !== "customer") {
-      return res.status(400).json({
-        success: false,
-        message: "Role can only be 'customer' or 'admin'",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await pool.query(
-      `INSERT INTO users(name, email, password, phone, role)
-   VALUES($1, $2, $3, $4, $5)
-   RETURNING *`,
-      [name, email, hashedPassword, phone, role || "customer"]
+    const result = await userService.createUsers(
+      name,
+      email,
+      password,
+      phone,
+      role,
     );
 
     const user = result.rows[0];
@@ -38,14 +24,22 @@ export const register = async (req: Request, res: Response) => {
       user,
     });
   } catch (err: any) {
-    console.error(err);
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
-      message: "Something went wrong",
+      message: err.message || "Something went wrong",
     });
   }
 };
 
-export const login = async (req: Request, res: Response) => {
-  res.send("Login working");
+const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  const result = await userService.loginUser(email, password);
+
+  return res.status(200).json(result);
+};
+
+export const authController = {
+  register,
+  login,
 };

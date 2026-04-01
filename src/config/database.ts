@@ -5,6 +5,10 @@ export const pool = new Pool({
   connectionString: config.connection_str,
 });
 
+enum Role {
+  "admin",
+  "customer",
+}
 const initDB = async () => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users(
@@ -13,9 +17,9 @@ const initDB = async () => {
       email VARCHAR(200) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
       phone VARCHAR(11) NOT NULL,
-      role VARCHAR(20) DEFAULT 'customer'
+      role VARCHAR(20) NOT NULL DEFAULT 'customer'
     )
   `);
 };
 
-export default initDB
+export default initDB;
