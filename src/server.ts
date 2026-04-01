@@ -5,9 +5,9 @@ import initDB from "./config/database";
 import { vehicleRoute } from "./modules/vehicle/vehicle.route";
 import { userRoute } from "./modules/users/users.route";
 import { bookingRoute } from "./modules/bookings/bookings.route";
-
+import cors from "cors";
 const app = express();
-
+app.use(cors()); 
 app.use(express.json());
 initDB();
 
