@@ -62,7 +62,10 @@ const loginUser = async (email: string, password: string) => {
   return { token: token, user: user.rows[0] };
 };
 
+
+
 export const userService = {
   createUsers,
   loginUser,
+ 
 };

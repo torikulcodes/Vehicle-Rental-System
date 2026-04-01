@@ -32,11 +32,23 @@ const register = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const result = await userService.loginUser(email, password);
+    const result = await userService.loginUser(email, password);
 
-  return res.status(200).json(result);
+    return res.status(200).json({
+      success: true,
+      message: "You successfully logged in",
+      token: result.token,
+      user: result.user,
+    });
+  } catch (error:any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
+  }
 };
 
 export const authController = {
